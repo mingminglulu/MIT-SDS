@@ -1,0 +1,842 @@
+---
+title: Multivariate Gaussian Distribution, Multivariate CLT, and Multivariate Delta
+  Method
+author: "None Leon"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.objective
+
+maximum likelihood estimation
+
+- maximize a strictly concave function in two or more dimensions
+
+- know that independence implies zero covariance but not vice-versa
+
+- define sample covariance as an unbiased estimator for the covariance
+
+- obtain the covariance matrix of a random vector
+
+- identify multivariate gaussian random variables and understand affine transformations of multivariate gaussian random variables
+
+- use multivariate central limit theorem
+
+- use multivariate delta method
+
+
+
+## 2.review:gradients and hessians; concavity in higher dimensions
+
+Multivariate concave functions
+More generally for a multivariate function: $h: \Theta \subset \mathbb{R}^d /: \rightarrow \mathbb{R}$, $d \geq 2$, define the
+gradient vector: $\nabla h(\theta)=\left(\begin{array}{c}\frac{\partial h}{\partial \theta_1}(\theta) \\ \vdots \\ \frac{\partial h}{\partial \partial_1}(\theta)\end{array}\right) \in \mathbb{R}^d$
+$h$ is concave $\Leftrightarrow x \mathbf{H} h(\theta) x \leq 0 \quad \forall x \in \mathbb{R}^d, \theta \in \Theta$.
+
+Hessian matrix:
+$$
+\mathbf{H} h(\theta)=\left(\begin{array}{ccc}
+\frac{\partial^2 h}{\partial \theta_1 \partial \theta_1}(\theta) & \cdots & \frac{\partial^2 h}{\partial \theta_1 \partial \theta_d}(\theta) \\
+& & \\
+\frac{\partial^2 h_i}{\partial \theta_d \partial \theta_1}(\theta) & \cdots & \frac{\partial^2 h}{\partial \theta_d \partial \theta_d}(\theta)
+\end{array}\right) \in \mathbb{R}^{d \times d}
+$$
+
+$h$ is concave $<=>$ $x^THh(\theta)x\le0,\forall x \in R^d,\theta\in \Theta$
+
+$h$ is strictly concave $\Leftrightarrow \quad x^{\top} \mathbf{H} h(\theta) x<0 \quad \forall x \in \mathbb{R}^d, \theta \in \Theta$.
+
+examples:
+
+- $\Theta=R^2,h(\theta)=-\theta_1^2-2\theta_2^2$ or $h(\theta)=-(\theta_1-\theta_2)^2$
+
+- $\Theta=(0,\infty),h(\theta)=\log(\theta_1+\theta_2)$
+
+
+Multivariable Calculus Review: Compute the Gradient
+
+
+Let
+$$
+\begin{aligned}
+f: \quad \mathbb{R}^d & \rightarrow \mathbb{R} \\
+\theta=\left(\begin{array}{c}
+\theta_1 \\
+\theta_2 \\
+\vdots \\
+\theta_d
+\end{array}\right) & \mapsto f(\theta) .
+\end{aligned}
+$$
+denote a differentiable function. The gradient of $f$ is the vector-valued function
+
+
+$$
+\begin{aligned}
+& \nabla f: \quad \mathbb{R}^d \quad \rightarrow \mathbb{R}^d \\
+& \theta=\left.\left(\begin{array}{c}
+\theta_1 \\
+\theta_2 \\
+\vdots \\
+\theta_d
+\end{array}\right) \mapsto\left(\begin{array}{c}
+\frac{\partial f}{\partial \theta_1} \\
+\frac{\partial f}{\partial \theta_2} \\
+\vdots \\
+\frac{\partial f}{\partial \theta_d}
+\end{array}\right)\right|_\theta . \\
+&
+\end{aligned}
+$$
+Consider $f(\theta)=-c_1 \theta_1^2-c_2 \theta_2^2-c_3 \theta_3^2$ where $c_1, c_2, c_3>0$ are positive real numbers.
+Compute the gradient $\nabla f$.
+(Enter your answer as a vector, e.g., type $[3,2, \mathbf{x}]$ for the vector $\left(\begin{array}{l}3 \\ 2 \\ x\end{array}\right)$.
+Note the square brackets, and commas as separators. Enter $\mathbf{c}_{-} \mathbf{i}$ for $c_i$, theta_i for $\theta_i$.)
+$\nabla f=$？
+
+
+Multivariable Calulus Review: Compute the Hessian Matrix
+
+As above, let
+$$
+f: \mathbb{R}^d \rightarrow \mathbb{R} \quad \theta=\left(\begin{array}{c}
+\theta_1 \\
+\theta_2 \\
+\vdots \\
+\theta_d
+\end{array}\right) \mapsto f(\theta) .
+$$
+denote a twice-differentiable function.
+The Hessian of $f$ is the matrix
+$$
+\mathbf{H} f: \mathbb{R}^d \rightarrow \mathbb{R}^{d \times d}
+$$
+whose entry in the $i$-th row and $j$-th column is defined by
+
+
+$$
+(\mathbf{H} f)_{i j}:=\frac{\partial^2}{\partial \theta_i \partial \theta_j} f, \quad 1 \leq i, j \leq d
+$$
+The Hessian matrix of $f$ in this context is also denoted by $\nabla^2 f$, the second derivative of $f$. This is not to be confused with the "Laplacian" of $f$, which is also denoted the same way.
+Consider the same function $f(\theta)=-c_1 \theta_1^2-c_2 \theta_2^2-c_3 \theta_3^2$ where $c_1, c_2, c_3>0$ as in the previous problem. Compute the Hessian matrix $\mathbf{H} f$.
+(Enter your answer as a matrix, e.g. by typing $\left[[1,2],\left[5^* \mathbf{x}, \mathbf{y}-1\right]\right]$ for the matrix $\left(\begin{array}{cc}1 & 2 \\ 5 x & y-1\end{array}\right)$. Note the square brackets, and commas as separaters.)
+$$
+\mathbf{H} f=
+$$
+
+Semi-Definiteness
+A symmetric (real-valued) $d \times d$ matrix $\mathbf{A}$ is positive semi-definite if
+$$
+\mathbf{x}^T \mathbf{A} \mathbf{x} \geq 0 \quad \text { for all } \mathbf{x} \in \mathbb{R}^d
+$$
+If the inequality above is strict, i.e. if $\mathbf{x}^T \mathbf{A} \mathbf{x}>0$ for all non-zero vectors $\mathbf{x} \in \mathbb{R}^d$, then $\mathbf{A}$ is positive definite
+Analogously, a symmetric (real-valued) $d \times d$ matrix $\mathbf{A}$ is negative semi-definite (resp. negative definite) if $\mathbf{x}^T \mathbf{A} \mathbf{x}$ is non-positive (resp. negative) for all $\mathbf{x} \in \mathbb{R}^d-\{\mathbf{0}\}$.
+Note that by definition, positive (or negative) definiteness implies positive (or negative) semi-definiteness.
+Consider the same function as in the problems above:
+$$
+f(\theta)=-c_1 \theta_1^2-c_2 \theta_2^2-c_3 \theta_3^2 \quad \text { where } c_1, c_2, c_3>0
+$$
+
+Compute $\mathbf{x}^T(\mathbf{H} f) \mathbf{x}$ where $\mathbf{x}=\left(\begin{array}{l}x_1 \\ x_2 \\ x_3\end{array}\right)$.
+$$
+\mathbf{x}^T(\mathbf{H} f) \mathbf{x}=
+$$
+
+
+The matrix $\mathbf{H} f$ is (Choose all that apply.)
+
+- positive semi-definite
+- positive definite
+- negative semi-definite
+- negative definite
+
+
+Hence, the function $f$ is (Choose all that apply.)
+
+- concave
+- strictly concave
+- convex
+- strictly convex
+
+
+Another Hessian computation
+
+Compute the Hessian $H$ of the function $(x, y) \mapsto f(x, y)=\ln (x+y)$ defined for $x, y>0$. Fill in the entries below.
+
+- $H_{11}=$
+- $H_{12}=$
+- $H_{21}=$
+- $H_{22}=$
+
+
+## Worked Example: Concavity and Composition of Functions
+
+- Combination of Convex functions
+
+Let $f_1, f_2$ be convex functions on $\mathbb{R}$.
+Determine if the following functions are necessarily convex or concave.
+Hint: Recall that a function $g: I \rightarrow \mathbb{R}$ defined on an interval $I$ is convex, if for all pairs of real numbers $x_1<x_2$ in $I$ we have:
+$$
+g\left(t x_1+(1-t) x_2\right) \leq t g\left(x_1\right)+(1-t) g\left(x_2\right) \quad \text { for all } 0 \leq t \leq 1 .
+$$
+- $3 f_1+2 f_2$ :
+
+- Convex
+- Concave
+- Cannot be determined without more information
+
+- $-10 f_1$ :
+
+- Convex
+- Concave
+- Cannot be determined without more information
+
+- $f_2 f_1$ :
+
+- Convex
+- Concave
+- Cannot be determined without more information
+
+## 4. Concavity in higher dimensions and Eigenvalues
+
+- Concavity in 2 dimensions: Compute the Hessian
+
+What is the Hessian $\mathbf{H} f$ of the function $f(x, y)=-2 x^2+\sqrt{2} x y-\frac{5}{2} y^2$ ? Fill in the values of the entries of $\mathbf{H} f$.
+$$
+(\mathbf{H} f)_{11}=
+$$
+$$
+(\mathbf{H} f)_{12}=
+$$
+$$
+(\mathbf{H} f)_{21}=
+$$
+$$
+(\mathbf{H} f)_{22}=
+$$
+
+- Concavity in 2 dimensions: Positive Definiteness and Eigenvalues
+
+A symmetric (real-valued) $d \times d$ matrix $\mathbf{A}$ is positive semi-definite (resp. positive definite) if and only if all of its eigenvalues are non-negative (resp. positive).
+
+Analogously, it is negative semi-definite (resp. negative definite) if and only if all of its eigenvalues are non-positive (resp. negative).
+As above, consider $f(x, y)=-2 x^2+\sqrt{2} x y-\frac{5}{2} y^2$.
+What are the eigenvalues $\lambda_1, \lambda_2$ of $\mathbf{H} f$ ? Assume that $\lambda_1<\lambda_2$.
+$$
+\lambda_1=\square \quad \lambda_2=\square
+$$
+Based on your answer to the last question, $f$ is ...
+
+- Convex
+- Concave
+- None of the Above
+
+## 5. Strictly Concave Functions and Unique Maximizer
+
+- optimality conditions
+
+Strictly concave functions are easy to maximize: if they have a maximum, then it is unique. It is the unique solution to
+$$
+h^{\prime}(\theta)=0,
+$$
+or, in the multivariate case
+$$
+\nabla h(\theta) =0 \in \mathbb{R}^d .
+$$
+There are many algorithms to find it numerically: this is the theory of "convex optimization". In this class, often a **closed form formula** for the maximum.
+
+- Concavity and Convexity in Higher Dimensions II
+
+As in the problem on the previous page, $f(x, y)=-2 x^2+\sqrt{2} x y-\frac{5}{2} y^2$. Based on your answer to the question, which of the following is true?
+$f$ has a unique (global) minimizer.
+$f$ has a unique (global) maximizer.
+$f$ has more than one (global) minimizer
+$f$ has more than one (global) maximizer
+Where is the critical point of $f$ ? (If there is more than one critical point, just enter one of them.)
+(Enter your answer as a vector, e.g., type [3,2] for the vector $\left(\begin{array}{l}3 \\ 2\end{array}\right)$, which corresponds to the point $(3,2)$ on the $(x, y)$-plane $)$.
+Critical point of $f$ :
+
+
+- Concavity Concept Check
+
+Let $f: \mathbb{R}^2 \rightarrow \mathbb{R}$ be a twice-differentiable function, such that the top-left element of the Hessian matrix $\mathbf{H} f(0,0)_{1,1}>0$ is positive. Is $f$ concave?
+
+- Yes
+- No
+- Not possible to determine from given information
+
+
+- Intuition for Optimizing Concave Functions
+
+Let $f: \mathbb{R} \rightarrow \mathbb{R}$ be a twice-differentiable function that has a critical point and is strictly concave. Recall that the critical point is a unique maximizer of $f$.
+You choose an initial guess for the maximizer $x_0=0$ (which may be very far from the true maximizer). You compute the derivative and observe that $f^{\prime}\left(x_0\right)<0$. Where is the maximizer of $f$ ?
+
+- To the left of $x_0=0$
+- To the right of $x_0=0$
+- Very far from $x_0$
+- Very close to $x_0$
+
+## 6. Multivariate Random Variables
+
+Multivariate Random Variables
+A multivariate random variable, or a random vector, is a vector-valued function whose components are (scalar) random variables on the same underlying probability space. More specifically, a random vector $\mathbf{X}=\left(X^{(1)}, \ldots, X^{(d)}\right)^T$ of dimension $d \times 1$ is a vectorvalued function from a probability space $\Omega$ to $\mathbb{R}^d$ :
+$$
+\begin{aligned}
+\mathbf{X}: \Omega & \rightarrow \mathbb{R}^d \\
+\omega & \mapsto\left(\begin{array}{c}
+X^{(1)}(\omega) \\
+X^{(2)}(\omega) \\
+\vdots \\
+X^{(d)}(\omega)
+\end{array}\right)
+\end{aligned}
+$$
+where each $X^{(k)}$ is a (scalar) random variable on $\Omega$. We will often (but not always) use the bracketed superscript $(k)$ to denote the $k$-th component of a random vector, especially when the subscript is already used to index the samples.
+The probability distribution of a random vector $\mathbf{X}$ is the joint distribution of its components $X^{(1)}, \ldots, X^{(d)}$
+
+The cumulative distribution function (cdf) of a random vector $\mathbf{X}$ is defined as
+$$
+\begin{aligned}
+F: \mathbb{R}^d & \rightarrow[0,1] \\
+\mathbf{x} & \mapsto \mathbf{P}\left(X^{(1)} \leq x^{(1)}, \ldots, X^{(d)} \leq x^{(d)}\right)
+\end{aligned}
+$$
+
+
+Convergence in Probability in Higher Dimension
+To make sense of the consistency statement $\hat{\theta}_n^{\text {MLE }} \stackrel{n \rightarrow \infty}{\stackrel{n}{(p)}} \theta^*$ where the MLE $\hat{\theta}_n^{\text {MLE }}$ is a random vector, we need to know what convergence in probability means in higher dimensions. But this is no more than convergence in probability for each component.
+Let $\mathbf{X}_1, \mathbf{X}_2 \ldots$ be a sequence of random vectors of size $d \times 1$, i.e. $\mathbf{X}_i=\left(\begin{array}{c}X_i^{(1)} \\ \vdots \\ X_i^{(d)}\end{array}\right)$. Let $\mathbf{X}=\left(\begin{array}{c}X^{(1)} \\ \vdots \\ X^{(d)}\end{array}\right)$ be another vector of size $d \times 1$
+Then
+$$
+\mathbf{X}_n \underset{n \rightarrow \infty}{\stackrel{(p)}{\longrightarrow}} \mathbf{X} \Longleftrightarrow X_n^{(k)} \underset{n \rightarrow \infty}{\stackrel{(p)}{\longrightarrow}} X^{(k)} \text { for all } 1 \leq k \leq d .
+$$
+In other words, the sequence $\mathbf{X}_1, \mathbf{X}_2, \ldots$ converges in probability to $\mathbf{X}$ if and only if each component sequence $X_1^{(k)}, X_2^{(k)}, \ldots$ converges in probability to $X^{(k)}$.
+Hence, for example, in the Gaussian model $\left((-\infty, \infty),\left\{\mathcal{N}\left(\mu, \sigma^2\right)\right\}_{\left(\mu, \sigma^2\right) \in \mathbb{R} \times \mathbb{R}_{>0}}\right)$, consistency of the MLE $\hat{\theta}_n^{\mathrm{MLE}}=\left(\begin{array}{c}\widehat{\mu} \\ \widehat{\sigma^2}\end{array}\right)$ means that $\widehat{\mu}$ and $\widehat{\sigma^2}$ are consistent estimators of $\mu^*$ and $\left(\sigma^2\right)^*$, respectively.
+
+Remark: You can check that this condition is equivalent to the following definition of convergence in probability, which is a straightforward generalization of the 1-dimensional case:
+$$
+\mathbf{P}\left(\left\{\omega \in \Omega:\left|\mathbf{X}_n(\omega)-\mathbf{X}(\omega)\right|<\epsilon\right\}\right) \stackrel{n \rightarrow \infty}{\longrightarrow} 1 \quad \text { for any } \epsilon>0
+$$
+
+## 7. Review: Covariance
+
+
+Review: Covariance
+
+If $X$ and $Y$ are random variables with respective means $\mu_X$ and $\mu_Y$, then recall the covariance of $X$ and $Y$ (written $\operatorname{Cov}(X, Y)$ ) is defined to be
+$$
+\operatorname{Cov}(X, Y)=\mathbb{E}\left[\left(X-\mu_X\right)\left(Y-\mu_Y\right)\right]
+$$
+Alternatively, one can show that this is equivalent to $\mathbb{E}[X Y]-\mathbb{E}[X] \mathbb{E}[Y]$.
+For each of the following statements, indicate whether it is true or false.
+"Cov $(X, X)=\operatorname{Var}(X) "$
+
+- True
+- False
+
+"Like the variance, the covariance between an arbitrary pair of RVs $X$ and $Y$ is always nonnegative."
+
+- True
+- False
+
+Covariance: Definition and Formula
+
+How about asymptotic normality?
+$$
+\hat{\theta}=\left(\begin{array}{l}
+\overline{X_n} \\
+\hat{S}_n
+\end{array}\right)
+$$
+In general, when $\theta \subset \mathbb{R}^d, d \geq 2$, its coordinates are not necessarily indeperdeest.
+The covariance between two random variables $X$ and $Y$ is
+$$
+\begin{aligned}
+\operatorname{Cov}(X, Y): & =\mathbb{E}[(X-\mathbb{E}[X])(Y-\mathbb{E}[Y])] \\
+& =\mathbb{E}[X \cdot Y]-\mathbb{E}[X] \mathbb{E}[Y] \\
+& =\mathbb{E}[X \cdot(Y-\mathbb{E}[Y])] \\
+& =\mathbb{E}[(X-\mathbb{E}[X]) Y]
+\end{aligned}
+$$
+
+
+Bilinearity of Covariance
+
+
+Let $X, Y, Z$ be random variables and $a, b$ be constants. Indicate whether the following statement is true or false.
+"Covariance is bilinear, i.e. $\operatorname{Cov}(a X+b Y, Z)=a \operatorname{Cov}(X, Z)+b \operatorname{Cov}(Y, Z)$."
+Hint: Use the result from the problem immediately above.
+
+- True
+- False
+
+Example of Covariance I
+
+Let $A=X+Y$ and $B=X-Y$. Let $\mu_X=\mathbb{E}[X], \mu_Y=\mathbb{E}[Y], \tau_X=\operatorname{Var}(X)$, $\tau_Y=\operatorname{Var}(Y)$ and $c=\operatorname{Cov}(X, Y)$. In terms of $\mu_X, \mu_Y, \tau_X, \tau_Y$, and $c$, what is $\operatorname{Cov}(A, B)$ ?
+(Enter mu_X for $\mu_X$, tau_X for $\tau_X$.)
+
+
+## 8. Covariance and Independence
+
+
+Review: Independence
+
+Let $X$ be a random variable that takes on values 0 and 1 with equal probability. You decide to communicate this random variable to your friend through a medium that "adds" (defined below in individual sub-problems) a random noise $Y$ that takes on values 0 and 1 with probabilities $\alpha_0$ and $\alpha_1$, respectively. Let $Y$ be independent of $X$ and let $Z$ denote the result of this "addition", which is what your friend receives.
+Note: This $Z=X$ add $Y$ model for random variables can be viewed as a problem on exploring functions of random variables. However, the problem is practically motivated by many real-world examples. For example, in a communication system the $X$ is usually what a sender sends over the "medium" and $Z$ is what the receiver receives. The "medium", which is also called channel, could range anything from a wired line to a wireless link connecting a sender and a receiver. The noise $Y$ added by the medium is independent of what the sender sends over the channel.
+In each of the following scenarios, indicate whether the statement in quotes is true or false.
+
+Scenario 1: You treat your random variable as a binary digit (bit) and the medium adds (XORs) noise that takes on binary values 0 and 1 with probabilities $\alpha_0=\frac{1}{2}$ and $\alpha_1=\frac{1}{2}$, respectively. That is $Z=X$ XOR $Y$. "In this scenario, $X$ and $Z$ are independent random variables."
+Note: The XOR of two bits $X$ and $Y$ is a function that takes in two bits and produces an output of $X$ if $Y=0$ and an output that is different from $X$ if $Y=1$.
+
+- True
+- False
+
+Scenario 2: You treat your random variable as a binary digit (bit) and the medium adds (XORs) noise that takes on binary value 0 and 1 with probabilities $\alpha_0=\frac{1}{3}$ and $\alpha_1=\frac{2}{3}$, respectively. That is $Z=X$ XOR $Y$. "In this scenario, $X$ and $Z$ are independent random variables."
+
+- True
+- False
+
+Scenario 3: You treat your random variable as an integer and the medium adds (integer addition) noise that takes on integer values 0 and 1 with probabilities $\alpha_0=\frac{1}{2}$ and $\alpha_1=\frac{1}{2}$, respectively. That is $Z=X+Y$. "In this scenario, $X$ and $Z$ are independent random variables."
+
+- True
+- False
+
+Independence, Estimation
+
+Problem setup as above.
+Your friend decides to perform ML estimation of what you might have transmitted based on what they received.
+Concretely, your friend wishes to obtain an ML estimate $\widehat{x}$ upon observing $z=x$ add $y$. They obtain a likelihood function $L(z, x)$, where $z$ is the observed realization of random variable $Z$ and $x$ can be treated as the unknown parameter. Assume that your friend knows that $X$ is equally likely to take on either 0 or 1 (in all scenarios).
+Under which scenario(s) would your friend's ML estimate $\widehat{X}$ be equal to $X$ with a probability more than $0.5$ ? (Choose all that apply.)
+Hint: Think heuristically, assuming you obtained the correct answers for the previous problem.
+
+- Scenario 1
+- Scenario 2
+- Scenario 3
+
+Covariance and Independence
+
+For each of the following statements, indicate whether it is true or false.
+" $X, Y$ are independent $\Longrightarrow \operatorname{Cov}(X, Y)=0 . "$
+Hint: $\mathbb{E}[X Y]=\mathbb{E}[X] \mathbb{E}[Y]$ whenever $X, Y$ are independent.)
+
+- True
+- False
+
+"Cov $(X, Y)=0 \Longrightarrow X, Y$ are independent."
+Hint: If this were false, there should be an easy counterexample. Is there an easy example where $\mathbb{E}[X Y]=0$ and $\mathbb{E}[Y]=0$ but $X, Y$ are not independent ?
+
+- True
+- False
+
+Video notes : There are other types of random variables for which zero covariance implies independence (besides Gaussian vectors), both discrete and continuous. A few examples of this include a Bernoulli pair, a binomial pair, a squared standard normal pair, a chi-square pair, and a standard log-normal pair.
+Also, at around 8:05 in the video below, the PDF should be $\frac{1}{2 \sqrt{2 \pi}} e^{-x^2 / 8}$, not $\frac{1}{\sqrt{2 \pi}} e^{-x^2 / 2}$.
+
+Properties
+$\operatorname{Cov}(X, Y)=$
+$\operatorname{Cov}(X, Y)=\operatorname{Cov}(Y, X)$
+If $X$ and $Y$ are independent, then $\operatorname{Cov}(X, Y)=$
+In general, the converse is not true except if $(X, Y)^{\top}$ is a Gaussian vector, i.e., $\alpha X+\beta Y$ is Gaussian for all $(\alpha, \beta) \in \mathbb{R}^2 \backslash\{(0,0)\}$
+Take $X \sim \mathcal{N}(0,1), B \sim \operatorname{Ber}(1 / 2), R=2 B-1 \sim \operatorname{Rad}(1 / 2)$. Then $Y=R \cdot X \sim$
+But taking $\alpha=\beta=1$, we get
+$$
+X+Y= \begin{cases} & \text { with prob. } 1 / 2 \\ & \text { with prob. } 1 / 2\end{cases}
+$$
+Actually $\operatorname{Cov}(X, Y)=0$ but they are not independent: $|X|=|Y|$
+
+
+
+## 9. Covariance in Real Life
+
+Sample Covariance
+
+Let $\left(X_1, Y_1\right),\left(X_2, Y_2\right), \ldots,\left(X_n, Y_n\right) \stackrel{\mathrm{iid}}{\sim}(X, Y)$ with $\mathbb{E}[X]=\mu_X, \mathbb{E}[Y]=\mu_Y$, and $\mathbb{E}[X Y]=\mu_{X Y}$. That is, each random variable pair $\left(X_i, Y_i\right)$ has the same distribution as the random variable pair $(X, Y)$, and the pairs are independent of one another.
+
+Estimating the covariance of $X$ and $Y$ is a useful exercise because non-zero covariance implies statistical dependence of $X$ and $Y$. In this problem, we study one way to obtain an unbiased estimator for $\operatorname{Cov}(X, Y)$.
+Consider the following estimator of the covariance:
+$$
+\widetilde{S}_{X Y}=\frac{1}{n}\left(\sum_{i=1}^n\left(X_i-\bar{X}_n\right)\left(Y_i-\bar{Y}_n\right)\right)
+$$
+where $\bar{X}_n$ and $\bar{Y}_n$ denote the sample means estimators of $\mu_X$ and $\mu_Y$.
+What is $\mathbb{E}\left[\frac{\left(\sum_{i=1}^n X_i\right)\left(\sum_{j=1}^n Y_j\right)}{n}\right]$ ? Provide an expression in terms of $n, \mu_X, \mu_Y$, and $\mu_{X Y}$.
+(Enter mu_\{XY\} for $\mu_{X Y}$, mu_X for $\mu_X$, and mu_Y for $\mu_Y$.)
+$$
+\mathbb{E}\left[\frac{\left(\sum_{i=1}^n X_i\right)\left(\sum_{j=1}^n Y_j\right)}{n}\right]=
+$$
+
+Is $\widetilde{S}_{X Y}$ an unbiased estimator of $\operatorname{Cov}(X, Y)$ ?
+
+- Yes
+- No
+
+If your answer to the above question is "Yes", then type "1" in the following box. Otherwise, find a scaling factor $c$ such that
+$$
+\widehat{S}_{X Y}=c \cdot \widetilde{S}_{X Y}
+$$
+is an unbiased estimator of $\operatorname{Cov}(X, Y)$. Provide your answer in terms of $n, \mu_X, \mu_Y$, and $\mu_{X Y}$.
+(Enter mu_ $\{X Y\}$ for $\mu_{X Y}$, mu_$_{-} \mathbf{X}$ for $\mu_X$, and mu_Y for $\mu_Y$.)
+$c=$
+
+## 10. Covariance Matrices
+
+
+Note on Notation: In this course, we assume all vectors to be column vectors. Therefore, while
+$$
+\mathbf{X}=\left[\begin{array}{c}
+X^{(1)} \\
+X^{(2)} \\
+\vdots \\
+X^{(d)}
+\end{array}\right]
+$$
+we sometimes write it as $\mathbf{X}=\left(X^{(1)}, \ldots, X^{(d)}\right)^T$ to be more compact in representation.
+
+Example of Covariance II
+
+Let $X, Y$ be random variables such that
+- $X$ takes the values $\pm 1$ each with probability $0.5$
+- (Conditioned on $X$ ) $Y$ is chosen uniformly from the set $\{-3 X-1,-3 X,-3 X+1\}$.
+(Round all answers to 2 decimal places.)
+What is $\operatorname{Cov}(X, X)$ (equivalent to $\operatorname{Var}(X))$ ?
+$\operatorname{Cov}(X, X)=$
+What is $\operatorname{Cov}(Y, Y)$ (equivalent to $\operatorname{Var}(Y))$ ?
+$\operatorname{Cov}(Y, Y)=$
+What is $\operatorname{Cov}(X, Y) ?$
+$\operatorname{Cov}(X, Y)=$
+What is $\operatorname{Cov}(Y, X) ?$
+$\operatorname{Cov}(Y, X)=$
+
+
+Covariance Matrix
+
+Given random variables $X^{(1)}, X^{(2)}, \ldots, X^{(d)}$, one can write down the covariance matrix $\Sigma$, where $\Sigma_{i, j}=\operatorname{Cov}\left(X^{(i)}, X^{(j)}\right)$
+Let $X^{(1)}, X^{(2)}$ be random variables such that
+- $X^{(1)}$ takes the values $\pm 1$ each with probability $0.5$
+- (Conditioned on $\left.X^{(1)}\right) X^{(2)}$ is chosen uniformly from the set $\left\{-3 X^{(1)}-1,-3 X^{(1)},-3 X^{(1)}+1\right\}$
+What is the covariance matrix $\Sigma$ ?
+$$
+\begin{array}{l|l}
+\Sigma_{1,1}= & \Sigma_{1,2}= \\
+\Sigma_{2,1}= & \Sigma_{2,2}=
+\end{array}
+$$
+
+Here is a compact formula for the covariance matrix using vector notation.
+Let $\mathbf{X}=\left(\begin{array}{c}X^{(1)} \\ \vdots \\ X^{(d)}\end{array}\right)$ be a random vector of size $d \times 1$.
+Let $\mu \triangleq \mathbb{E}[\mathbf{X}]$ denote the entry-wise mean, i.e.
+$$
+\mathbb{E}[\mathbf{X}]=\left(\begin{array}{c}
+\mathbb{E}\left[X^{(1)}\right] \\
+\vdots \\
+\mathbb{E}\left[X^{(d)}\right]
+\end{array}\right) .
+$$
+Consider the vector outer product (refer to Homework 0) $(\mathbf{X}-\mu)(\mathbf{X}-\mu)^T$, which is a random $d \times d$ matrix. Then the covariance matrix $\Sigma$ can be written as
+$$
+\Sigma=\mathbb{E}\left[(\mathbf{X}-\mu)(\mathbf{X}-\mu)^T\right] .
+$$
+
+Covariance Matrix: Properties I
+
+Let $\mathbf{X}$ be a random vector and let $\mathbf{Y}=\mathbf{X}+B$, where $B$ is a constant vector. Let $\mu_{\mathbf{X}}$ be the mean vector of $\mathbf{X}$ and let $\Sigma_{\mathbf{X}}$ be the covariance matrix of $\mathbf{X}$. Select from the following all statements that are correct. (Choose all that apply.)
+
+- The covariance matrix of $\mathbf{Y}$ could potentially be equal to $\Sigma_{\mathbf{X}}$ only under some conditions imposed on $B$
+
+- The covariance matrix of $\mathbf{Y}$ is the same as $\Sigma_{\mathbf{X}}$ for all vectors $B$
+
+- The covariance matrix of $\mathbf{Y}$ has the same size as the matrix $\Sigma_{\mathbf{X}}$
+
+- The covariance matrix of $\mathbf{Y}$ is the same as $\Sigma_{\mathbf{X}}$ if and only if vector $B$ is equal to 0
+
+Covariance Matrix: Properties II
+
+
+Let $\mathbf{X}$ be a random vector of size $d \times 1$ and let $\mathbf{Y}=A \mathbf{X}+B$, where $A$ is a constant matrix of size $n \times d$ and $B$ is a constant vector of size $n \times 1$. Let $\mu_{\mathbf{X}}$ be the mean vector of $\mathbf{X}$ and let $\Sigma_{\mathbf{X}}$ be the covariance matrix of $\mathbf{X}$. Let $\mu_{\mathbf{Y}}$ be the mean vector of $\mathbf{Y}$ and let $\Sigma_{\mathbf{Y}}$ be the covariance matrix of $\mathbf{Y}$.
+Select from the following all statements that are correct. (Choose all that apply.)
+
+- $\Sigma_{\mathbf{Y}}$ is the same as covariance matrix of $A \mathbf{X}$
+
+- $\Sigma_{\mathbf{Y}}$ is of size $n \times n$
+
+- $\Sigma_{\mathbf{Y}}=A^2 \Sigma_{\mathbf{X}}$
+
+- $\Sigma_{\mathbf{Y}}=A \Sigma_{\mathbf{X}} A^T$
+
+- $\Sigma_{\mathbf{Y}}=A^T \Sigma_{\mathbf{X}} A$
+
+
+Covariance Matrix: Affine Transformation
+Covariance matrix
+The covariance matrix of a random vector $X=\left(X^{(1)}, \ldots, X^{(d)}\right)^{\top} \in \mathbb{R}^d$ is given by
+$$
+\Sigma=\operatorname{Cov}(X)=\mathbb{E}\left[(X-\mathbb{E}(X))(X-\mathbb{E}(X))^{\top}\right]
+$$
+This is a matrix of size $d x d$
+The term on the $i$ th row and $j$ th column is
+$$
+\Sigma_{i j}=\mathbb{E}\left[\left(X^{(i)}-\mathbb{E}\left(X^{(i)}\right)\right)\left(X^{(j)}-\mathbb{E}\left(X^{(j)}\right)\right)\right]=\operatorname{Cov}\left(X^{(i)}, X^{(j)}\right)
+$$
+In particular, on the diagonal, we have
+$$
+\Sigma_{i i}=\operatorname{Cov}\left(X^{(i)}, X^{(i)}\right)=\operatorname{Var}\left(X^{(i)}\right)
+$$
+Recall that for $X \in \mathbb{R}$, $\operatorname{Var}(a X+b)=a^2 \operatorname{Var}(X)$. Actually, if $X \in \mathbb{R}^d$ and $A, B$ are matrices:
+$$
+\operatorname{Cov}(A X+B)=\operatorname{Cov}(A X)
+$$
+Effect of Linear Transformations of Covariance Matrix
+
+
+
+Let $\mathbf{X}=\left(\begin{array}{l}X^{(1)} \\ X^{(2)}\end{array}\right)$ be a random vector with covariance Matrix $\Sigma_{\mathbf{X}}=\left(\begin{array}{cc}1 & 1 / 2 \\ 1 / 2 & 1\end{array}\right)$.
+Let $\mathbf{Y}=M \mathbf{X}$, where $M=\left(\begin{array}{cc}1 & -1 \\ 1 & 1\end{array}\right)$.
+Observe that $Y^{(1)}=X^{(1)}-X^{(2)}$ and $Y^{(2)}=X^{(1)}+X^{(2)}$. What is the new covariance matrix $\Sigma_Y ?$
+$$
+\left(\Sigma_{\mathbf{Y}}\right)_{1,1}=\quad\left(\Sigma_{\mathbf{Y}}\right)_{1,2}=
+$$
+$$
+\left(\Sigma_{\mathbf{Y}}\right)_{2,1}=\square \quad\left(\Sigma_{\mathbf{Y}}\right)_{2,2}=
+$$
+
+## 11. Multivariate Gaussian Distribution
+
+
+Video Note: In the slide of the video below, there is a typo in the formula of the pdf of the multivariate Gaussian distribution: the exponent $d$ in overall scaling factor should apply only to $2 \pi$, rather than $2 \pi \operatorname{det} \Sigma$. The correct version is in the note below the video. (The unannotated slides in the resource section have also been corrected).
+
+Also, at around 8:13 in the video below, the professor says "but basically this is just the Gaussian CDF." This should instead be "but basically this is just the Gaussian PDF."
+
+Multivariate Gaussian Distribution: Definition
+
+If $(X, Y)^{\top}$ is a Gaussian vector then its pdf depends on 5 parameters:
+$$
+\mathbb{E}[X], \operatorname{Vor}(X), \mathbb{E}[Y], \operatorname{Var}(Y) \text { and } \operatorname{Cov}(X, Y)
+$$
+More generally, a Gaussian vector ${ }^3 X \in \mathbb{R}^d$, is completely determined by its expected value and $\mathbb{E}[X]=\mu \in \mathbb{R}^d$ covariance matrix $\Sigma$. We write
+$$
+X \sim \mathcal{N}_d(\mu, \Sigma) .
+$$
+It has pdf over $\mathbb{R}^d$ given by:
+$$
+f(x)=f(x_1,...,x_d)=\frac{1}{(2 \pi \operatorname{det}(\Sigma))^{d / 2}} \exp \left(-\frac{1}{2}(x-\mu)^{\top} \Sigma^{-1}(x-\mu)\right)
+$$
+
+Multivariate Gaussian Random Variable
+A random vector $\mathbf{X}=\left(X^{(1)}, \ldots, X^{(d)}\right)^T$ is a Gaussian vector, or multivariate Gaussian or normal variable, if any linear combination of its components is a (univariate) Gaussian variable or a constant (a "Gaussian" variable with zero variance), i.e., if $\alpha^T \mathbf{X}$ is (univariate) Gaussian or constant for any constant non-zero vector $\alpha \in \mathbb{R}^d$.
+
+The distribution of $\mathbf{X}$, the $d$-dimensional Gaussian or normal distribution , is completely specified by the vector mean $\mu=\mathbb{E}[\mathbf{X}]=\left(\mathbb{E}\left[X^{(1)}\right], \ldots, \mathbb{E}\left[X^{(d)}\right]\right)^T$ and the $d \times d$ covariance matrix $\Sigma$. If $\Sigma$ is invertible, then the pdf of $\mathbf{X}$ is
+$$
+f_{\mathbf{X}}(\mathbf{x})=\frac{1}{\sqrt{(2 \pi)^d \operatorname{det}(\Sigma)}} e^{-\frac{1}{2}(\mathbf{x}-\mu)^T \Sigma^{-1}(\mathbf{x}-\mu)}, \quad \mathbf{x} \in \mathbb{R}^d
+$$
+where $\operatorname{det}(\Sigma)$ is the determinant of the $\Sigma$, which is positive when $\Sigma$ is invertible.
+If $\mu=\mathbf{0}$ and $\Sigma$ is the identity matrix, then $\mathbf{X}$ is called a standard normal random vector.
+Note that when the covariant matrix $\Sigma$ is diagonal, the pdf factors into pdfs of univariate Gaussians, and hence the components are independent.
+
+
+
+
+Linear Transformation of a Multivariate Gaussian Random Vector
+
+
+Consider the 2-dimensional Gaussian $\mathbf{X}=\left(\begin{array}{c}X^{(1)} \\ X^{(2)}\end{array}\right)$ with covariance matrix $\Sigma_X=\left(\begin{array}{ll}1 & 2 \\ 2 & 5\end{array}\right)$ and mean $\mu_{\mathbf{X}}=\left(\begin{array}{l}0 \\ 0\end{array}\right)$
+Consider the vector $\alpha=\left(\begin{array}{c}1 \\ -1\end{array}\right)$, so that $Y=\alpha^T \mathbf{X}$ is a 1-dimensional Gaussian.
+What is the variance $\operatorname{Var}(Y)$ of $Y$ ?
+$\operatorname{Var}(Y)=$
+
+Singular Covariance Matrices
+
+Consider again a 2 -dimensional Gaussian $\mathbf{X}=\left(\begin{array}{c}X^{(1)} \\ X^{(2)}\end{array}\right)$. But instead, $\Sigma_X$ is $\left(\begin{array}{ll}1 & 2 \\ 2 & 4\end{array}\right)$ and $\alpha=\left(\begin{array}{c}2 \\ -1\end{array}\right)$, what is the variance $\operatorname{Var}(Y)$ of $Y=\alpha^T \mathbf{X} ?$
+$$
+\operatorname{Var}(Y)=
+$$
+This result tells us that the Gaussian $\left(X^{(1)}, X^{(2)}\right)^T$ is actually a one-dimensional Gaussian, orthogonal to the direction of $\left(\begin{array}{c}2 \\ -1\end{array}\right)$.
+
+(Optional) Diagonalization of the Covariance Matrix
+Let $\Sigma$ be a covariance matrix of size $d \times d$. Note that its entries are all real numbers with diagonal elements being non-negative. $\Sigma$ has the following properties:
+- $\Sigma$ is symmetric. That is, $\Sigma=\Sigma^T$.
+- $\Sigma$ is diagonalizable to a diagonal matrix $D$ via a transformation $D=U \Sigma U^T$, where $U$ is an orthogonal matrix (recall that a square matrix $A$ is orthogonal if $A A^T=A^T A=I$, where $I$ is the identity matrix). This implies that $\Sigma=U^T D U$.
+- Moreover, $\Sigma$ is positive semidefinite. That is, the diagonal matrix $D$ has diagonal entries that are all non-negative.
+- $\Sigma$ has a unique positive semidefinite square root matrix. That is, there exists a positive semidefinite matrix $\Sigma^{\frac{1}{2}}$ that is unique such that $\Sigma^{\frac{1}{2}} \cdot \Sigma^{\frac{1}{2}}=\Sigma$.
+- If $\Sigma$ is of size $d \times d$, then it has $d$ orthonormal eigenvectors (even if there are repeated eigenvalues). Furthermore, if $U$ is a matrix with rows corresponding to the orthonormal eigenvectors, then the diagonal matrix $D=U \Sigma U^T$ contains the eigenvalues of $\Sigma$ along its diagonal. Therefore, diagonalization of a symmetric matrix involves finding its eigenvalues and the orthonormal eigenvectors.
+- If $\Sigma$ is positive definite, i.e. the diagonal matrix $D=U \Sigma U^T$ has diagonal entries that are all strictly positive, then it is invertible and the inverse $\Sigma^{-1}$ satisfies the following:
+$\Sigma^{-\frac{1}{2}} \cdot \Sigma^{-\frac{1}{2}}=\Sigma^{-1}$, where $\Sigma^{-\frac{1}{2}}$ is the inverse of the square root of $\Sigma$.
+
+(Optional) Gaussian Random Vectors I
+
+Recall from an earlier part of this lecture that the covariance between two random variables being 0 does not necessarily imply that the random variables are independent. However, this is true if the random variables are multivariate Gaussian.
+
+Let $\mathbf{X}$ be a Gaussian random vector with mean $\mu$ and covariance $\Sigma$. Assume that $\Sigma$ is positive definite. Determine if the following statement is true or false.
+"There exists a vector $B$ and a matrix $A$ such that $A(\mathbf{X}+B)$ is a Gaussian random vector whose components are independent and each of mean 0 ".
+
+- True
+- False
+
+Hint: Refer to the note above on diagonalization of the covariance matrix.
+
+
+## 12. Multivariate Central Limit Theorem
+
+Vector Version of the Central Limit Theorem
+
+Let $\mathbf{X}$ be a random vector of dimension $d \times 1$ and let $\mu$ and $\Sigma$ be its mean and covariance. Let $\mathbf{X}_1, \ldots, \mathbf{X}_n$ be i.i.d. copies of $\mathbf{X}$. Let $\overline{\mathbf{X}}_n \triangleq \frac{1}{n} \sum_{i=1}^n \mathbf{X}_i$.
+
+Based on your knowledge of the central limit theorem for a single random variable, select from the following the correct shift and scale factor for $\overline{\mathbf{X}}_n$ so that $\overline{\mathbf{X}}_n$ could potentially converge to the Gaussian random vector $\mathcal{N}\left(0, I_{d \times d}\right)$.
+
+- $\sqrt{d} \cdot \Sigma^{-\frac{1}{2}}\left(\overline{\mathbf{X}}_n-\mu\right)$
+- $\sqrt{d} \cdot \Sigma^{-1}\left(\overline{\mathbf{X}}_n-\mu\right)$
+- $\sqrt{n} \cdot \Sigma^{-1}\left(\overline{\mathbf{X}}_n-\mu\right)$
+- $\sqrt{n} \cdot \Sigma^{-\frac{1}{2}}\left(\overline{\mathbf{X}}_n-\mu\right)$
+- None of the above
+
+
+The multivariate $\mathrm{CLT}$
+The CLT may be generalized to averages or random vectors (also vectors of averages).
+Let $X_1, \ldots, X_n \in \mathbb{R}^d$ be independent copies of a random vector $X$ such that $\mathbb{E}[X]=\mu, \operatorname{Cov}(X)=\Sigma$,
+$$
+\sqrt{n}\left(\bar{X}_n-\mu\right) \underset{n \rightarrow \infty}{\stackrel{(d)}{\longrightarrow}} N_d\left(0, \sum\right)
+$$
+Equivalently
+$$
+\sqrt{n} \Sigma^{-1/2}\left(\bar{X}_n-\mu\right) \quad \underset{n \rightarrow \infty}{\stackrel{(d)}{\longrightarrow}} \mathcal{N}_d\left(0, I_d\right)
+$$
+(Optional) Multivariate Convergence in Distribution and Proof of Multivariate CLT
+Convergence in Distribution in Higher Dimensions
+Convergence in distribution of a random vector is not implied by convergence in distribution of each of its components.
+
+A sequence $\mathbf{T}_1, \mathbf{T}_2, \ldots$ of random vectors in $\mathbb{R}^d$ converges in distribution to a random vector $\mathbf{T}$ if
+$$
+\mathbf{v}^T \mathbf{T}_n \quad \stackrel{n \rightarrow \infty}{\longrightarrow} \mathbf{v}^T \mathbf{T} \quad \text { for all } \mathbf{v} \in \mathbb{R}^d \quad \text { (multivariate convergence in distribution). }
+$$
+That is, the vector sequence $\left(\mathbf{T}_n\right)_{n \geq 1}$ converges in distribution only if its dot product $\mathbf{v}^T \mathbf{T}_n$ with any constant vector $\mathbf{v}$, which is a scalar random variable, converges in distribution (or equivalently, if the projection of the vector sequence onto any line converges in distribution.)
+Univariate CLT Implies Multivariate CLT
+Let $\mathbf{X}_1, \ldots, \mathbf{X}_n \stackrel{i . i . d .}{\sim} \mathbf{X}$ be random vectors in $\mathbb{R}^d$ with (vector) mean $\mathbb{E}[\mathbf{X}]=\mu_{\mathbf{X}}$ and covariance matrix $\Sigma_{\mathbf{X}}$.
+Let $\mathbf{v} \in \mathbb{R}^d$ and define $Y_i=\mathbf{v}^T \mathbf{X}_i$. Then
+
+- $Y_i$ is a scalar random variable;
+- Its mean and variance are $\mathbb{E}\left[Y_i\right]=\mathbf{v}^T \mathbb{E}\left[\mathbf{X}_i\right]$ and $\sigma_{Y_i}^2=\mathbf{v}^T \Sigma_{\mathbf{X}_i} \mathbf{v}$ (you can check that the variance is indeed a scalar).
+Hence $Y_i$ satisfies the univariate $\mathrm{CLT}$ :
+$$
+\sqrt{n}\left(\overline{Y_n}-\mathbf{v}^T \mu_{\mathbf{X}}\right) \stackrel{n \rightarrow \infty}{\longrightarrow} \mathcal{( d )} \mathcal{N}\left(0, \mathbf{v}^T \Sigma_{\mathbf{X}} \mathbf{v}\right)
+$$
+On the other hand, consider a multivariate Gaussian variable $\mathbf{Z} \sim \mathcal{N}\left(\mathbf{0}, \Sigma_{\mathbf{X}}\right)$. For any constant vector $\mathbf{v} \in \mathbb{R}^d, \mathbf{v}^T \mathbf{Z}$ is a univariate Gaussian with variance $\mathbf{v}^T \Sigma_{\mathbf{X}} \mathbf{v}$. Hence, $\mathbf{v}^T \mathbf{Z} \sim \mathcal{N}\left(0, \mathbf{v}^T \Sigma_{\mathbf{X}} \mathbf{v}\right)$, which is the distribution on the right hand side above. Therefore, $\overline{\mathbf{X}_n}$ converges in distribution:
+$$
+\begin{aligned}
+& \sqrt{n}\left(\mathbf{v}^T \overline{\mathbf{X}_n}-\mathbf{v}^T \mu_{\mathbf{X}}\right)=\sqrt{n}\left(\overline{Y_n}-\mathbf{v}^T \mu_{\mathbf{X}}\right) \stackrel{n \rightarrow \infty}{\longrightarrow} \mathcal{( d )} \mathcal{N}\left(0, \mathbf{v}^T \Sigma_{\mathbf{X}} \mathbf{v}\right)=\mathbf{v}^T \mathcal{N}\left(0, \Sigma_{\mathbf{X}}\right) \\
+& \left.\Longleftrightarrow \quad \sqrt{n}\left(\overline{\mathbf{X}}_n-\mu_{\mathbf{X}}\right) \quad \stackrel{n \rightarrow \infty}{\longrightarrow} \mathcal{N}\right)\left(0, \Sigma_{\mathbf{X}}\right) \\
+&
+\end{aligned}
+$$
+
+
+## 13. Multivariate Delta Method
+
+Let $\left(T_n\right)_{n \geq 1}$ sequence of random vectors in $\mathbb{R}^d$ such that
+$$
+\sqrt{n}\left(T_n-\theta\right) \underset{n \rightarrow \infty}{\stackrel{(d)}{\longrightarrow}} \mathcal{N}_d(0, \Sigma),
+$$
+for some $\theta \in \mathbb{R}^d$ and some covariance $\Sigma \in \mathbb{R}^{d \times d}$.
+Let $g: \mathbb{R}^d \rightarrow \mathbb{R}^k(k \geq 1)$ be continuously differentiable at $\theta$. Then,
+$$
+\sqrt{n}\left(g\left(T_n\right)-g(\theta)\right) \underset{n \rightarrow \infty}{\stackrel{(d)}{\longrightarrow}} \mathcal{N}_k\left(0, \nabla_g(\theta)^{\top} \Sigma \nabla_g(\theta)\right),
+$$
+where $\nabla g(\theta)=\frac{\partial g}{\partial \theta}(\theta)=\left(\frac{\partial g_j}{\partial \theta_i}\right)_{\substack{1 \leq i \leq d \\ 1 \leq j \leq k}} \in \mathbb{R}^{d \times k}$
+
+
+Gradient Matrix of a Vector Function
+
+Given a vector-valued function $f: \mathbb{R}^d \rightarrow \mathbb{R}^k$, the gradient or the gradient matrix of $f$, denoted by $\nabla f$, is the $d \times k$ matrix
+$$
+\begin{aligned}
+\nabla f & =\left(\begin{array}{cccc}
+\mid & \mid & \mid & \mid \\
+\nabla f_1 & \nabla f_2 & \ldots & \nabla f_k \\
+\mid & \mid & \mid & \mid
+\end{array}\right) \\
+& =\left(\begin{array}{ccc}
+\frac{\partial f_1}{\partial x_1} & \cdots & \frac{\partial f_k}{\partial x_1} \\
+\vdots & & \vdots \\
+\frac{\partial f_1}{\partial x_d} & \cdots & \frac{\partial f_k}{\partial x_d}
+\end{array}\right)
+\end{aligned}
+$$
+This is also the transpose of what is known as the Jacobian matrix $\mathbf{J}_f$ of $f$.
+Let $f(x, y, z)=\left(\begin{array}{c}x^2+y^2+z^2 \\ 2 x y \\ y^3+z^3 \\ z^4\end{array}\right)$.
+How many rows does $\nabla f(x, y, z)$ have?
+
+
+How many columns does $\nabla f(x, y, z)$ have?
+What does column 2 represent in the gradient matrix?
+
+- Derivative of $2 x y$ with respect to $x, y, z$ stacked as a column
+- Derivative of the individual functions with respect to $y$ stacked as a column
+
+What is $\nabla f(x, y, z)_{3,2} ?$
+
+General Statement of the Multivariate Delta Method
+
+The multivariate delta method states that given
+- a sequence of random vectors $\left(\mathbf{T}_n\right)_{n \geq 1}$ satisfying $\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right) \stackrel{(d)}{\longrightarrow \rightarrow \infty} \mathbf{T}$,
+- a function $\mathbf{g}: \mathbb{R}^d \rightarrow \mathbb{R}^k$ that is continuously differentiable at $\vec{\theta}$, then
+$$
+\sqrt{n}\left(\mathbf{g}\left(\mathbf{T}_n\right)-\mathbf{g}(\vec{\theta})\right) \underset{n \rightarrow \infty}{\stackrel{(d)}{\longrightarrow}} \nabla \mathbf{g}(\vec{\theta})^T \mathbf{T} \quad \text { where } \nabla \mathbf{g}=\left(\begin{array}{cccc}
+\mid & \mid & \ldots & \mid \\
+\nabla \mathbf{g}_1 & \nabla \mathbf{g}_2 & \ldots & \nabla \mathbf{g}_k \\
+\mid & \mid & \ldots & \mid
+\end{array}\right)
+$$
+Common Application
+In the lecture and in most applications, $\mathbf{T}_n=\overline{\mathbf{X}}_n$ where $\overline{\mathbf{X}}_n$ is the sample average of $\mathbf{X}_1, \ldots, \mathbf{X}_n \stackrel{i i d}{\sim} \mathbf{X}$, and $\vec{\theta}=\mathbb{E}[\mathbf{X}]$. The (multivariate) CLT then gives $\mathbf{T} \sim \mathcal{N}\left(\mathbf{0}, \Sigma_{\mathbf{X}}\right)$ where $\Sigma_{\mathbf{X}}$ is the covariance of $\mathbf{X}$. In this case, we have
+$$
+\sqrt{n}\left(\mathbf{g}\left(\mathbf{T}_n\right)-\mathbf{g}(\vec{\theta})\right) \underset{n \rightarrow \infty}{\stackrel{(d)}{\longrightarrow}} \nabla \mathbf{g}(\vec{\theta})^T \mathbf{T} \sim \mathcal{N}\left(0, \nabla \mathbf{g}(\vec{\theta})^T \Sigma_{\mathbf{X}} \nabla \mathbf{g}(\vec{\theta})\right) \quad\left(\mathbf{T} \sim \mathcal{N}\left(\mathbf{0}, \Sigma_{\mathbf{X}}\right)\right) .
+$$
+
+(Optional) Proof of Multivariate Delta Method
+As in the univariate case, the main idea of the proof of the multivariate delta method is to apply the first order multivariate Taylor theorem (i.e. linear approximation with a remainder term), and then use (multivariate) Slutsky's, and the continuous mapping theorem to establish the required convergence.
+Slutsky's theorem and the continuous mapping theorems in higher dimensions are straightforward generalizations of these same theorems in one dimension, i.e. where applicable, scalar random variables are replaced with random vectors.
+Proof:
+Let $\left(\mathbf{T}_n\right)_{n \geq 1}$ be a sequence of random vectors in $\mathbb{R}^d$ such that
+$$
+\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right) \underset{{ }_{n \rightarrow \infty}}{\stackrel{(d)}{\longrightarrow}} \mathbf{T},
+$$
+for some $\vec{\theta} \in \mathbb{R}^d$
+Let $\mathbf{g}: \mathbb{R}^d \rightarrow \mathbb{R}^k$ be continuously differentiable at $\vec{\theta}$. Then, for any vector $\mathbf{t} \in \mathbb{R}^d$, the first order multivariate Taylor's expansion at $\vec{\theta}$ gives
+$$
+\mathbf{g}(\mathbf{t})=\mathbf{g}(\vec{\theta})+\nabla \mathbf{g}(\vec{\theta})^T(\mathbf{t}-\vec{\theta})+\|\mathbf{t}-\vec{\theta}\| \mathbf{u}(\mathbf{t})
+$$
+where $\mathbf{u}(\mathbf{t}) \rightarrow \mathbf{0}$ as $\mathbf{t} \rightarrow \vec{\theta}$
+
+
+Extend the above equation by replacing $\mathbf{t}$ with a random vector $\mathbf{T}_n$, rearrange and multiply both sides by $\sqrt{n}$ :
+$$
+\sqrt{n}\left(\mathbf{g}\left(\mathbf{T}_n\right)-\mathbf{g}(\vec{\theta})\right)=\nabla \mathbf{g}(\vec{\theta})^T\left(\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right)+\left\|\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right\| \mathbf{u}\left(\mathbf{T}_n\right) .
+$$
+Let us look at convergence of each term on the right as $n \rightarrow \infty$. We will apply the multivariat version of continuous mapping theorem and Slutsky's theorem multiple times to our ingredient:
+$$
+\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right) \stackrel{{ }^{(d)}}{\longrightarrow} \mathbf{T},
+$$
+which also implies
+$$
+\left(\mathbf{T}_n-\vec{\theta}\right) \stackrel{(d) /(p)}{\underset{n \rightarrow \infty}{\longrightarrow}} \mathbf{0} .
+$$
+The first term $\nabla \mathbf{g}(\vec{\theta})^T\left(\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right)$ is a continuous function of $\left(\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right)$, hence
+$$
+\nabla \mathbf{g}(\vec{\theta})^T\left(\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right) \stackrel{{ }^{(d)}}{\longrightarrow}(\nabla \mathbf{g}(\vec{\theta}))^T \mathbf{T} \quad \text { by continuous mapping theorem. }
+$$
+For the second term, the first factor $\left\|\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right\|$ is again a continuous function of $\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)$, and therefore
+
+$\left\|\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right\| \underset{n \rightarrow \infty}{\stackrel{(d)}{\longrightarrow}}\|\mathbf{T}\| \quad$ by continuous mapping theorem.
+The second factor in the second term is a continuous function of $\mathbf{T}_n$ near $\theta$. Hence $\mathbf{u}\left(\mathbf{T}_n\right) \stackrel{(d) /(p)}{\longrightarrow} \mathbf{n \rightarrow \infty}(\vec{\theta})=\mathbf{0} \quad$ by continuous mapping theorem.
+By (multivariate) Slutsky theorem, the entire second term converges to $\mathbf{0}$ :
+$$
+\left\|\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right\| \mathbf{u}\left(\mathbf{T}_n\right) \stackrel{(d) / \mathbf{P}}{\longrightarrow}\|\mathbf{n \rightarrow \infty}\|(\mathbf{0})=\mathbf{0}
+$$
+Finally, applying the (multivariate) Slutsky theorem to the sum of the two terms gives:
+$$
+\nabla \mathbf{g}(\vec{\theta})^T\left(\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right)+\left\|\sqrt{n}\left(\mathbf{T}_n-\vec{\theta}\right)\right\| \mathbf{u}\left(\mathbf{T}_n\right) \stackrel{{ }^{(d)}}{{ }_{n \rightarrow \infty}^{\longrightarrow}} \nabla \mathbf{g}(\vec{\theta})^T \mathbf{T}+\mathbf{0}=\nabla \mathbf{g}(\vec{\theta})^T \mathbf{T}
+$$
+This establishes the multivariate delta method.
+
+
+
